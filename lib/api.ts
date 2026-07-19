@@ -59,6 +59,7 @@ export interface Batch {
   name: string;
   price: string;
   end_date: string;
+  min_participant_age: number | null;
 }
 
 export type PublicBatchStatus = "em-breve" | "ativo" | "esgotado";

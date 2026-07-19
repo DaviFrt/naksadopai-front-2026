@@ -14,7 +14,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { Plus, Pencil } from "lucide-react";
+import { Plus, Pencil, Loader2 } from "lucide-react";
 
 function toDateInput(value: string) {
   return value.slice(0, 10);
@@ -62,6 +62,12 @@ export default function AdminBatchesPage() {
       </div>
 
       <div className="flex flex-col gap-3">
+        {batches === null && (
+          <div className="flex items-center justify-center gap-2 py-10 text-muted-foreground">
+            <Loader2 className="size-5 animate-spin" />
+            <span className="text-sm">Carregando lotes...</span>
+          </div>
+        )}
         {batches?.map((batch) => (
           <div
             key={batch.id}

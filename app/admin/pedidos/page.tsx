@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { BirthDateSelect } from "@/components/birth-date-select";
 import {
   Dialog,
   DialogContent,
@@ -32,7 +33,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const STATUS_LABEL: Record<OrderStatus, string> = {
@@ -81,6 +82,7 @@ interface Filters {
   source: string;
   search: string;
   page: number;
+  page_size: number;
 }
 
 const emptyFilters: Filters = {
@@ -90,7 +92,10 @@ const emptyFilters: Filters = {
   source: "",
   search: "",
   page: 1,
+  page_size: 20,
 };
+
+const PAGE_SIZE_OPTIONS = [20, 50, 100];
 
 export default function AdminOrdersPage() {
   const [filters, setFilters] = useState<Filters>(emptyFilters);
@@ -99,6 +104,7 @@ export default function AdminOrdersPage() {
   const [churches, setChurches] = useState<Church[]>([]);
   const [batches, setBatches] = useState<AdminBatch[]>([]);
   const [createOpen, setCreateOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   function load() {
     const params = new URLSearchParams();
@@ -108,8 +114,12 @@ export default function AdminOrdersPage() {
     if (filters.source) params.set("source", filters.source);
     if (filters.search) params.set("search", filters.search);
     params.set("page", String(filters.page));
+    params.set("page_size", String(filters.page_size));
 
-    apiFetch<AdminOrdersResponse>(`/api/admin/orders?${params.toString()}`).then(setResponse);
+    setLoading(true);
+    apiFetch<AdminOrdersResponse>(`/api/admin/orders?${params.toString()}`)
+      .then(setResponse)
+      .finally(() => setLoading(false));
   }
 
   useEffect(load, [filters]);
@@ -257,7 +267,12 @@ export default function AdminOrdersPage() {
         )}
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-border">
+      <div className="relative overflow-x-auto rounded-2xl border border-border">
+        {loading && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60">
+            <Loader2 className="size-6 animate-spin text-primary" />
+          </div>
+        )}
         <table className="w-full min-w-225 border-collapse text-sm">
           <thead>
             <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
@@ -285,13 +300,13 @@ export default function AdminOrdersPage() {
             ))}
           </tbody>
         </table>
-        {rows.length === 0 && (
+        {!loading && rows.length === 0 && (
           <p className="px-4 py-8 text-center text-muted-foreground">Nenhuma inscrição encontrada.</p>
         )}
       </div>
 
       {response && (
-        <div className="flex items-center justify-center gap-4">
+        <div className="flex flex-wrap items-center justify-center gap-4">
           <Button
             type="button"
             variant="outline"
@@ -314,6 +329,24 @@ export default function AdminOrdersPage() {
           >
             Próxima
           </Button>
+
+          <Select
+            value={String(filters.page_size)}
+            onValueChange={(v) =>
+              v && setFilters({ ...filters, page_size: Number(v), page: 1 })
+            }
+          >
+            <SelectTrigger size="sm" className="h-9 w-auto">
+              <SelectValue>{(v: string) => `${v} por página`}</SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {PAGE_SIZE_OPTIONS.map((size) => (
+                <SelectItem key={size} value={String(size)}>
+                  {size} por página
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       )}
     </div>
@@ -401,15 +434,15 @@ function ParticipantRow({
           </div>
         </td>
         <td className="px-3 py-2">
-          <Input
-            type="date"
-            className="h-8 text-sm"
-            value={birthDate}
-            onChange={(e) => {
-              setBirthDate(e.target.value);
-              saveParticipant({ birth_date: e.target.value });
-            }}
-          />
+          <div className="min-w-52">
+            <BirthDateSelect
+              value={birthDate}
+              onChange={(v) => {
+                setBirthDate(v);
+                saveParticipant({ birth_date: v });
+              }}
+            />
+          </div>
         </td>
         <td className="px-3 py-2 text-muted-foreground">{calculateAge(birthDate)}</td>
         <td className="px-3 py-2">
@@ -680,12 +713,11 @@ function NewOrderForm({
               value={participant.name}
               onChange={(e) => update(index, { name: e.target.value })}
             />
+            <BirthDateSelect
+              value={participant.birth_date}
+              onChange={(v) => update(index, { birth_date: v })}
+            />
             <div className="grid grid-cols-2 gap-3">
-              <Input
-                type="date"
-                value={participant.birth_date}
-                onChange={(e) => update(index, { birth_date: e.target.value })}
-              />
               <Select
                 value={participant.gender}
                 onValueChange={(v) => update(index, { gender: v as Gender })}
@@ -700,8 +732,6 @@ function NewOrderForm({
                   <SelectItem value="FEMALE">Feminino</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
               <Select
                 value={participant.shirt_size}
                 onValueChange={(v) => update(index, { shirt_size: v as ShirtSize })}
@@ -717,6 +747,8 @@ function NewOrderForm({
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div className="grid grid-cols-1 gap-3">
               <Select
                 value={participant.church_id || undefined}
                 onValueChange={(v) => v && update(index, { church_id: v })}

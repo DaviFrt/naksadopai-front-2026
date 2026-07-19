@@ -14,7 +14,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { Plus, Pencil } from "lucide-react";
+import { Plus, Pencil, Loader2 } from "lucide-react";
 
 export default function AdminChurchesPage() {
   const [churches, setChurches] = useState<Church[] | null>(null);
@@ -49,6 +49,12 @@ export default function AdminChurchesPage() {
       </div>
 
       <div className="flex flex-col gap-3">
+        {churches === null && (
+          <div className="flex items-center justify-center gap-2 py-10 text-muted-foreground">
+            <Loader2 className="size-5 animate-spin" />
+            <span className="text-sm">Carregando igrejas...</span>
+          </div>
+        )}
         {churches?.map((church) => (
           <div
             key={church.id}

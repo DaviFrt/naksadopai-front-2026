@@ -10,6 +10,7 @@ import {
   type ShirtSize,
 } from "@/lib/api";
 import { cardClass } from "@/lib/ui";
+import { Loader2 } from "lucide-react";
 
 const PAYMENT_METHOD_LABEL: Record<string, string> = {
   MERCADO_PAGO: "Mercado Pago",
@@ -58,6 +59,12 @@ export default function AdminReportsPage() {
 
       <section className="flex flex-col gap-4">
         <h2 className="text-lg font-semibold text-brand-tan">Camisas</h2>
+        {shirts === null && (
+          <div className="flex items-center gap-2 py-6 text-brand-cream/60">
+            <Loader2 className="size-5 animate-spin" />
+            <span className="text-sm">Carregando...</span>
+          </div>
+        )}
         {shirts && (
           <div className={`${cardClass} grid grid-cols-2 gap-8`}>
             <div>
@@ -92,6 +99,12 @@ export default function AdminReportsPage() {
 
       <section className="flex flex-col gap-4">
         <h2 className="text-lg font-semibold text-brand-tan">Financeiro</h2>
+        {financial === null && (
+          <div className="flex items-center gap-2 py-6 text-brand-cream/60">
+            <Loader2 className="size-5 animate-spin" />
+            <span className="text-sm">Carregando...</span>
+          </div>
+        )}
         {financial && (
           <>
             <div className={`${cardClass} grid grid-cols-3 gap-4`}>
@@ -130,6 +143,12 @@ export default function AdminReportsPage() {
       <section className="flex flex-col gap-4">
         <h2 className="text-lg font-semibold text-brand-tan">Igrejas</h2>
         <div className="flex flex-col gap-3">
+          {churches === null && (
+            <div className="flex items-center gap-2 py-6 text-brand-cream/60">
+              <Loader2 className="size-5 animate-spin" />
+              <span className="text-sm">Carregando...</span>
+            </div>
+          )}
           {churches?.map((church) => {
             const men = sortByAge(church.participants.filter((p) => p.gender === "MALE"));
             const women = sortByAge(church.participants.filter((p) => p.gender === "FEMALE"));

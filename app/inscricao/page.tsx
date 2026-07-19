@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BirthDateSelect } from "@/components/birth-date-select";
 import { GlowBackground } from "@/components/glow-background";
 import { Plus, X } from "lucide-react";
 
@@ -82,7 +83,9 @@ export default function InscricaoPage() {
     } catch (err) {
       console.error(err);
       setError(
-        "Não foi possível concluir sua inscrição. Por favor, entre em contato com a liderança e informe o erro.",
+        err instanceof ApiError
+          ? err.message
+          : "Não foi possível concluir sua inscrição. Por favor, entre em contato com a liderança e informe o erro.",
       );
       setPending(false);
       submittingRef.current = false;
@@ -127,6 +130,12 @@ export default function InscricaoPage() {
           <span className="mt-4 inline-flex w-fit items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.25em] text-primary">
             {batch.name} · R$ {Number(batch.price).toFixed(2)} por pessoa
           </span>
+        )}
+        {batch && batch.min_participant_age !== null && (
+          <p className="mt-3 text-sm text-muted-foreground">
+            Inscrições abertas somente para participantes a partir de {batch.min_participant_age}{" "}
+            anos.
+          </p>
         )}
       </div>
 
@@ -191,18 +200,15 @@ export default function InscricaoPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor={`birth-${index}`}>Data de nascimento</Label>
-                  <Input
-                    id={`birth-${index}`}
-                    type="date"
-                    required
-                    value={participant.birth_date}
-                    onChange={(e) => updateParticipant(index, { birth_date: e.target.value })}
-                  />
-                </div>
+              <div className="flex flex-col gap-1.5">
+                <Label>Data de nascimento</Label>
+                <BirthDateSelect
+                  value={participant.birth_date}
+                  onChange={(v) => updateParticipant(index, { birth_date: v })}
+                />
+              </div>
 
+              <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
                   <Label>Gênero</Label>
                   <Select
@@ -220,9 +226,7 @@ export default function InscricaoPage() {
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
                   <Label>Tamanho da camisa</Label>
                   <Select
@@ -241,7 +245,9 @@ export default function InscricaoPage() {
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
 
+              <div className="grid grid-cols-1 gap-4">
                 <div className="flex flex-col gap-1.5">
                   <Label>Igreja</Label>
                   <Select
