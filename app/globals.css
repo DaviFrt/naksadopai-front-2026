@@ -1,26 +1,99 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0b0b0a;
+  --foreground: #f2e6d3;
+
+  --color-brand-black: #0b0b0a;
+  --color-brand-gold: #c17f3e;
+  --color-brand-gold-dark: #9c6530;
+  --color-brand-tan: #e3bd90;
+  --color-brand-cream: #f5ebd9;
+
+  --primary: var(--color-brand-gold);
+  --primary-foreground: var(--color-brand-black);
+  --secondary: var(--color-brand-tan);
+  --secondary-foreground: var(--color-brand-black);
+  --muted: #1a1611;
+  --muted-foreground: #b8ac98;
+  --accent: #1a1611;
+  --accent-foreground: var(--color-brand-cream);
+  --destructive: #ef4444;
+  --destructive-foreground: #fff5f5;
+  --border: #33291d;
+  --input: #33291d;
+  --ring: var(--color-brand-gold);
+  --card: #131110;
+  --card-foreground: var(--color-brand-cream);
+  --popover: #131110;
+  --popover-foreground: var(--color-brand-cream);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-brand-black: var(--color-brand-black);
+  --color-brand-gold: var(--color-brand-gold);
+  --color-brand-gold-dark: var(--color-brand-gold-dark);
+  --color-brand-tan: var(--color-brand-tan);
+  --color-brand-cream: var(--color-brand-cream);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-cinzel);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+@keyframes glow-float {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.5;
+  }
+  33% {
+    transform: translate(80px, -60px) scale(1.25);
+    opacity: 1;
+  }
+  66% {
+    transform: translate(-50px, 50px) scale(0.9);
+    opacity: 0.7;
+  }
+}
+
+@keyframes particle-rise {
+  0% {
+    transform: translateY(0) translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100vh) translateX(var(--drift, 0px));
+    opacity: 0;
+  }
 }
