@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { apiFetch, type Church, type Order } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { ParticipantBadge } from "@/components/participant-badge";
@@ -12,6 +12,14 @@ const MAX_ATTEMPTS = 15;
 const POLL_INTERVAL_MS = 2000;
 
 export default function CheckoutPendingPage() {
+  return (
+    <Suspense fallback={null}>
+      <CheckoutPendingContent />
+    </Suspense>
+  );
+}
+
+function CheckoutPendingContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("external_reference");
 
