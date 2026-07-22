@@ -13,7 +13,7 @@ import { cardClass } from "@/lib/ui";
 import { Loader2 } from "lucide-react";
 
 const PAYMENT_METHOD_LABEL: Record<string, string> = {
-  MERCADO_PAGO: "Mercado Pago",
+  INFINITE_PAY: "InfinitePay",
   PIX_MANUAL: "Pix (manual)",
   CASH: "Dinheiro",
   CARD_MANUAL: "Cartão (manual)",

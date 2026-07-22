@@ -74,12 +74,12 @@ export default function InscricaoPage() {
         body: JSON.stringify({ participants }),
       });
 
-      const { init_point } = await apiFetch<{ init_point: string }>(
+      const { checkout_url } = await apiFetch<{ checkout_url: string }>(
         `/api/orders/${order.id}/checkout`,
         { method: "POST" },
       );
 
-      window.location.href = init_point;
+      window.location.href = checkout_url;
     } catch (err) {
       console.error(err);
       setError(

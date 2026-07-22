@@ -7,6 +7,7 @@ const links = [
   { href: "#tema", label: "Tema" },
   { href: "#lotes", label: "Lotes" },
   { href: "/inscricao", label: "Inscrição" },
+  { href: "/minhas-inscricoes", label: "Minhas Inscrições" },
 ]
 
 export function SiteHeader() {

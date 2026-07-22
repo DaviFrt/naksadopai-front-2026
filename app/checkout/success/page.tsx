@@ -24,7 +24,7 @@ export default function CheckoutSuccessPage() {
 
 function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
-  const orderId = searchParams.get("external_reference");
+  const orderId = searchParams.get("order_nsu");
 
   const [order, setOrder] = useState<Order | null>(null);
   const [churches, setChurches] = useState<Church[]>([]);

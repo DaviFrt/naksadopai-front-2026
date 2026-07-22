@@ -8,7 +8,6 @@ export const EVENTO = {
   dataLabel: "25 a 27 de Setembro de 2026",
   cidade: "Brejo dos Santos · PB",
   realizacao: "IEAB · NA KSA DO PAI",
-  // Link do checkout do Mercado Pago (troque pelo seu link real)
 } as const
 
 export function formatBRL(valor: number) {

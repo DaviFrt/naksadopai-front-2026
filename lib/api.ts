@@ -44,7 +44,7 @@ export type Gender = "MALE" | "FEMALE";
 export type ShirtSize = "PP" | "P" | "M" | "G" | "GG" | "XG";
 export type UserRole = "ADMIN" | "STAFF" | "USER";
 export type OrderStatus = "PENDING" | "PAID" | "EXEMPT" | "CANCELLED" | "EXPIRED" | "REFUNDED";
-export type PaymentMethod = "MERCADO_PAGO" | "PIX_MANUAL" | "CASH" | "CARD_MANUAL";
+export type PaymentMethod = "INFINITE_PAY" | "PIX_MANUAL" | "CASH" | "CARD_MANUAL";
 export type OrderSource = "SITE" | "ADMIN";
 
 export interface User {

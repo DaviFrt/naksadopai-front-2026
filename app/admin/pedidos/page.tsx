@@ -55,7 +55,7 @@ const STATUS_COLOR: Record<OrderStatus, string> = {
 };
 
 const PAYMENT_METHOD_LABEL: Record<PaymentMethod, string> = {
-  MERCADO_PAGO: "Mercado Pago",
+  INFINITE_PAY: "InfinitePay",
   PIX_MANUAL: "Pix (manual)",
   CASH: "Dinheiro",
   CARD_MANUAL: "Cartão (manual)",
@@ -410,7 +410,7 @@ function ParticipantRow({
   }
 
   const unitValue = Number(order.totalAmount) / order.participants.length;
-  const isMercadoPago = order.paymentMethod === "MERCADO_PAGO";
+  const isInfinitePay = order.paymentMethod === "INFINITE_PAY";
 
   return (
     <>
@@ -533,8 +533,8 @@ function ParticipantRow({
           </Select>
         </td>
         <td className="px-3 py-2">
-          {isMercadoPago ? (
-            <span className="text-sm text-muted-foreground">Mercado Pago</span>
+          {isInfinitePay ? (
+            <span className="text-sm text-muted-foreground">InfinitePay</span>
           ) : (
             <Select
               value={paymentMethod || undefined}
@@ -629,7 +629,7 @@ function NewOrderForm({
       <DialogHeader>
         <DialogTitle>Novo pedido manual</DialogTitle>
         <DialogDescription>
-          Cadastro feito pelo admin — não passa pelo Mercado Pago.
+          Cadastro feito pelo admin — não passa pela InfinitePay.
         </DialogDescription>
       </DialogHeader>
 
