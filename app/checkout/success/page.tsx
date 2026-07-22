@@ -139,7 +139,7 @@ function CheckoutSuccessContent() {
               </div>
 
               <QrCode
-                value="https://www.naksadopai.daviamom.dev.br"
+                value="https://naksadopai.daviamom.dev.br"
                 size={140}
               />
 
