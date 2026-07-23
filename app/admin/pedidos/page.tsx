@@ -62,7 +62,7 @@ const PAYMENT_METHOD_LABEL: Record<PaymentMethod, string> = {
 };
 
 const MANUAL_PAYMENT_METHODS: PaymentMethod[] = ["PIX_MANUAL", "CASH", "CARD_MANUAL"];
-const SHIRT_SIZES: ShirtSize[] = ["PP", "P", "M", "G", "GG", "XG"];
+const SHIRT_SIZES: ShirtSize[] = ["PP", "P", "M", "G", "GG", "XG", "XGG"];
 const GENDER_LABEL: Record<Gender, string> = { MALE: "M", FEMALE: "F" };
 const ALL = "__all__";
 

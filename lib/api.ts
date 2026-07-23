@@ -41,7 +41,7 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
 }
 
 export type Gender = "MALE" | "FEMALE";
-export type ShirtSize = "PP" | "P" | "M" | "G" | "GG" | "XG";
+export type ShirtSize = "PP" | "P" | "M" | "G" | "GG" | "XG" | "XGG";
 export type UserRole = "ADMIN" | "STAFF" | "USER";
 export type OrderStatus = "PENDING" | "PAID" | "EXEMPT" | "CANCELLED" | "EXPIRED" | "REFUNDED";
 export type PaymentMethod = "INFINITE_PAY" | "PIX_MANUAL" | "CASH" | "CARD_MANUAL";

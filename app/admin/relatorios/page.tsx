@@ -19,7 +19,7 @@ const PAYMENT_METHOD_LABEL: Record<string, string> = {
   CARD_MANUAL: "Cartão (manual)",
 };
 
-const SHIRT_SIZES: ShirtSize[] = ["PP", "P", "M", "G", "GG", "XG"];
+const SHIRT_SIZES: ShirtSize[] = ["PP", "P", "M", "G", "GG", "XG", "XGG"];
 
 function calculateAge(birthDate: string): number {
   const birth = new Date(birthDate);

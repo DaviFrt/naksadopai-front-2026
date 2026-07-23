@@ -21,7 +21,7 @@ interface ParticipantForm {
   church_id: string;
 }
 
-const SHIRT_SIZES: ShirtSize[] = ["PP", "P", "M", "G", "GG", "XG"];
+const SHIRT_SIZES: ShirtSize[] = ["PP", "P", "M", "G", "GG", "XG", "XGG"];
 
 function emptyParticipant(): ParticipantForm {
   return { name: "", birth_date: "", gender: "MALE", shirt_size: "M", church_id: "" };
