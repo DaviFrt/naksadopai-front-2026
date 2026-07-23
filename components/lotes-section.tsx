@@ -30,8 +30,12 @@ export async function LotesSection() {
         </div>
 
         <div className="mt-14 grid gap-6 md:grid-cols-3">
-          {batches.map((lote) => {
+          {batches.map((lote, index) => {
             const ativo = lote.status === "ativo"
+            const beneficios =
+              index === 2
+                ? ["Kit do participante"]
+                : ["Camiseta Oficial", "Kit do participante"]
             return (
               <div
                 key={lote.id}
@@ -82,7 +86,7 @@ export async function LotesSection() {
                 </p>
 
                 <ul className="mt-6 flex flex-col gap-3 text-sm text-muted-foreground">
-                  {["Camiseta Oficial", "Kit do participante"].map(
+                  {beneficios.map(
                     (item) => (
                       <li key={item} className="flex items-center gap-2">
                         <Check className="h-4 w-4 shrink-0 text-primary" />
