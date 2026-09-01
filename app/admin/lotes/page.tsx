@@ -16,8 +16,13 @@ import {
 } from "@/components/ui/dialog";
 import { Plus, Pencil, Loader2 } from "lucide-react";
 
+// O backend grava os instantes em UTC (ex.: fim de dia em Brasília ->
+// 02:59:59.999 UTC do dia seguinte). Deslocamos por -3h (offset fixo de
+// America/Sao_Paulo, sem horário de verão desde 2019) antes de extrair a
+// data civil, senão o fim do lote aparece um dia à frente do real.
 function toDateInput(value: string) {
-  return value.slice(0, 10);
+  const saoPauloInstant = new Date(new Date(value).getTime() - 3 * 60 * 60 * 1000);
+  return saoPauloInstant.toISOString().slice(0, 10);
 }
 
 interface BatchFormState {
