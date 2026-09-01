@@ -52,10 +52,22 @@ export default function AdminReportsPage() {
   const femaleTotal = shirts
     ? Object.values(shirts.FEMALE).reduce((sum, n) => sum + (n ?? 0), 0)
     : 0;
+  const totalParticipants = shirts ? maleTotal + femaleTotal : null;
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-10">
       <h1 className="text-2xl font-bold uppercase text-brand-gold">Relatórios</h1>
+
+      <div className="flex flex-col items-center gap-1 rounded-2xl border-2 border-brand-gold bg-brand-gold/10 px-6 py-8 text-center">
+        <p className="text-xs font-semibold uppercase tracking-widest text-brand-tan">
+          Total de inscritos pagos
+        </p>
+        {totalParticipants === null ? (
+          <Loader2 className="mt-2 size-6 animate-spin text-brand-gold" />
+        ) : (
+          <p className="text-5xl font-extrabold text-brand-gold">{totalParticipants}</p>
+        )}
+      </div>
 
       <section className="flex flex-col gap-4">
         <h2 className="text-lg font-semibold text-brand-tan">Camisas</h2>
