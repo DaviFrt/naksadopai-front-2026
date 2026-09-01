@@ -4,6 +4,13 @@ import { Button } from "@/components/ui/button"
 import { Check, Lock, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
 
+// Este componente roda no servidor (React Server Component); sem timeZone
+// explícito, toLocaleDateString usaria o fuso do processo Node (geralmente
+// UTC em produção) em vez do horário de Brasília.
+function formatDateInSaoPaulo(value: string) {
+  return new Date(value).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" })
+}
+
 export async function LotesSection() {
   const batches = await apiFetch<PublicBatch[]>("/api/batches", { cache: "no-store" }).catch(
     () => [] as PublicBatch[],
@@ -81,8 +88,8 @@ export async function LotesSection() {
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">
                   {lote.status === "esgotado"
-                    ? `Encerrou em ${new Date(lote.end_date).toLocaleDateString("pt-BR")}`
-                    : `Válido até ${new Date(lote.end_date).toLocaleDateString("pt-BR")}`}
+                    ? `Encerrou em ${formatDateInSaoPaulo(lote.end_date)}`
+                    : `Válido até ${formatDateInSaoPaulo(lote.end_date)}`}
                 </p>
 
                 <ul className="mt-6 flex flex-col gap-3 text-sm text-muted-foreground">
