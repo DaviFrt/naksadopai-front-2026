@@ -14,6 +14,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Pencil, Loader2 } from "lucide-react";
 
 // O backend grava os instantes em UTC (ex.: fim de dia em Brasília ->
@@ -30,9 +31,16 @@ interface BatchFormState {
   start_date: string;
   end_date: string;
   price: string;
+  includes_shirt: boolean;
 }
 
-const emptyForm: BatchFormState = { name: "", start_date: "", end_date: "", price: "" };
+const emptyForm: BatchFormState = {
+  name: "",
+  start_date: "",
+  end_date: "",
+  price: "",
+  includes_shirt: true,
+};
 
 export default function AdminBatchesPage() {
   const [batches, setBatches] = useState<AdminBatch[] | null>(null);
@@ -83,6 +91,7 @@ export default function AdminBatchesPage() {
               <p className="text-sm text-muted-foreground">
                 {toDateInput(batch.startDate)} a {toDateInput(batch.endDate)} — R${" "}
                 {Number(batch.price).toFixed(2)}
+                {!batch.includesShirt && " — sem camisa"}
               </p>
             </div>
             <Button variant="outline" size="sm" onClick={() => setEditing(batch)}>
@@ -130,6 +139,7 @@ function BatchForm({
           start_date: toDateInput(batch.startDate),
           end_date: toDateInput(batch.endDate),
           price: String(batch.price),
+          includes_shirt: batch.includesShirt,
         }
       : emptyForm,
   );
@@ -205,6 +215,17 @@ function BatchForm({
           value={form.price}
           onChange={(e) => setForm({ ...form, price: e.target.value })}
         />
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Checkbox
+          id="batch-includes-shirt"
+          checked={form.includes_shirt}
+          onCheckedChange={(checked) => setForm({ ...form, includes_shirt: checked === true })}
+        />
+        <Label htmlFor="batch-includes-shirt" className="font-normal">
+          Este lote inclui camiseta (pede tamanho no cadastro)
+        </Label>
       </div>
 
       {error && <p className="text-sm text-destructive">{error}</p>}

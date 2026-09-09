@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { BirthDateSelect } from "@/components/birth-date-select";
 import { GlowBackground } from "@/components/glow-background";
 import { Plus, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ParticipantForm {
   name: string;
@@ -69,9 +70,13 @@ export default function InscricaoPage() {
     setPending(true);
 
     try {
+      const payload = batch?.includes_shirt
+        ? participants
+        : participants.map(({ shirt_size: _shirt_size, ...rest }) => rest);
+
       const { order } = await apiFetch<{ order: Order }>("/api/orders", {
         method: "POST",
-        body: JSON.stringify({ participants }),
+        body: JSON.stringify({ participants: payload }),
       });
 
       const { checkout_url } = await apiFetch<{ checkout_url: string }>(
@@ -208,7 +213,7 @@ export default function InscricaoPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className={cn("grid gap-4", batch?.includes_shirt === false ? "grid-cols-1" : "grid-cols-2")}>
                 <div className="flex flex-col gap-1.5">
                   <Label>Gênero</Label>
                   <Select
@@ -227,24 +232,26 @@ export default function InscricaoPage() {
                   </Select>
                 </div>
 
-                <div className="flex flex-col gap-1.5">
-                  <Label>Tamanho da camisa</Label>
-                  <Select
-                    value={participant.shirt_size}
-                    onValueChange={(v) => v && updateParticipant(index, { shirt_size: v as ShirtSize })}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SHIRT_SIZES.map((size) => (
-                        <SelectItem key={size} value={size}>
-                          {size}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                {batch?.includes_shirt !== false && (
+                  <div className="flex flex-col gap-1.5">
+                    <Label>Tamanho da camisa</Label>
+                    <Select
+                      value={participant.shirt_size}
+                      onValueChange={(v) => v && updateParticipant(index, { shirt_size: v as ShirtSize })}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SHIRT_SIZES.map((size) => (
+                          <SelectItem key={size} value={size}>
+                            {size}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-1 gap-4">

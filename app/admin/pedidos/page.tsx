@@ -40,6 +40,7 @@ const STATUS_LABEL: Record<OrderStatus, string> = {
   PENDING: "Pendente",
   PAID: "Pago",
   EXEMPT: "Isento",
+  SHIRT_CONFIRMED: "Camisa confirmada",
   CANCELLED: "Cancelado",
   EXPIRED: "Expirado",
   REFUNDED: "Reembolsado",
@@ -49,6 +50,7 @@ const STATUS_COLOR: Record<OrderStatus, string> = {
   PENDING: "text-brand-tan",
   PAID: "text-emerald-400",
   EXEMPT: "text-muted-foreground",
+  SHIRT_CONFIRMED: "text-amber-400",
   CANCELLED: "text-red-400",
   EXPIRED: "text-red-400/70",
   REFUNDED: "text-red-400/70",
@@ -369,7 +371,7 @@ function ParticipantRow({
   const [name, setName] = useState(participant.name);
   const [birthDate, setBirthDate] = useState(participant.birthDate.slice(0, 10));
   const [gender, setGender] = useState<Gender>(participant.gender);
-  const [shirtSize, setShirtSize] = useState<ShirtSize>(participant.shirtSize);
+  const [shirtSize, setShirtSize] = useState<ShirtSize | "">(participant.shirtSize ?? "");
   const [churchId, setChurchId] = useState(participant.churchId);
   const [status, setStatus] = useState<OrderStatus>(order.status);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | "">(
@@ -468,7 +470,7 @@ function ParticipantRow({
         </td>
         <td className="px-3 py-2">
           <Select
-            value={shirtSize}
+            value={shirtSize || undefined}
             onValueChange={(v) => {
               const value = v as ShirtSize;
               setShirtSize(value);
@@ -476,7 +478,7 @@ function ParticipantRow({
             }}
           >
             <SelectTrigger size="sm" className="h-8 w-16">
-              <SelectValue />
+              <SelectValue placeholder="—" />
             </SelectTrigger>
             <SelectContent>
               {SHIRT_SIZES.map((size) => (
@@ -594,7 +596,7 @@ function NewOrderForm({
 }) {
   const [participants, setParticipants] = useState<NewParticipant[]>([emptyParticipant()]);
   const [batchId, setBatchId] = useState("");
-  const [status, setStatus] = useState<"PENDING" | "PAID" | "EXEMPT">("PAID");
+  const [status, setStatus] = useState<"PENDING" | "PAID" | "EXEMPT" | "SHIRT_CONFIRMED">("PAID");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("PIX_MANUAL");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -657,7 +659,12 @@ function NewOrderForm({
             <SelectTrigger className="w-full">
               <SelectValue>
                 {(v: string) =>
-                  ({ PAID: "Pago", PENDING: "Pendente", EXEMPT: "Isento" })[v] ?? v
+                  ({
+                    PAID: "Pago",
+                    PENDING: "Pendente",
+                    EXEMPT: "Isento",
+                    SHIRT_CONFIRMED: "Camisa confirmada",
+                  })[v] ?? v
                 }
               </SelectValue>
             </SelectTrigger>
@@ -665,6 +672,7 @@ function NewOrderForm({
               <SelectItem value="PAID">Pago</SelectItem>
               <SelectItem value="PENDING">Pendente</SelectItem>
               <SelectItem value="EXEMPT">Isento</SelectItem>
+              <SelectItem value="SHIRT_CONFIRMED">Camisa confirmada</SelectItem>
             </SelectContent>
           </Select>
         </div>

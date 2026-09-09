@@ -37,12 +37,11 @@ export async function LotesSection() {
         </div>
 
         <div className="mt-14 grid gap-6 md:grid-cols-3">
-          {batches.map((lote, index) => {
+          {batches.map((lote) => {
             const ativo = lote.status === "ativo"
-            const beneficios =
-              index === 2
-                ? ["Kit do participante"]
-                : ["Camiseta Oficial", "Kit do participante"]
+            const beneficios = lote.includes_shirt
+              ? ["Camiseta Oficial", "Kit do participante"]
+              : ["Kit do participante"]
             return (
               <div
                 key={lote.id}

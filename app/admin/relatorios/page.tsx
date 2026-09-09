@@ -119,7 +119,7 @@ export default function AdminReportsPage() {
         )}
         {financial && (
           <>
-            <div className={`${cardClass} grid grid-cols-3 gap-4`}>
+            <div className={`${cardClass} grid grid-cols-2 gap-4 sm:grid-cols-4`}>
               <div>
                 <p className="text-xl font-bold text-brand-gold">
                   R$ {financial.total_paid.toFixed(2)}
@@ -131,6 +131,12 @@ export default function AdminReportsPage() {
                   R$ {financial.total_pending.toFixed(2)}
                 </p>
                 <p className="text-xs uppercase text-brand-cream/60">Pendente</p>
+              </div>
+              <div>
+                <p className="text-xl font-bold text-amber-400">
+                  R$ {financial.total_pending_guest_church.toFixed(2)}
+                </p>
+                <p className="text-xs uppercase text-brand-cream/60">Pendente Igreja Convidada</p>
               </div>
               <div>
                 <p className="text-xl font-bold text-brand-cream">{financial.total_exempt}</p>
@@ -188,7 +194,8 @@ export default function AdminReportsPage() {
                           <li key={p.id} className="flex justify-between gap-2">
                             <span>{p.name}</span>
                             <span className="shrink-0 text-brand-cream/40">
-                              {calculateAge(p.birthDate)} · {p.shirtSize}
+                              {calculateAge(p.birthDate)}
+                              {p.shirtSize ? ` · ${p.shirtSize}` : ""}
                             </span>
                           </li>
                         ))}
@@ -203,7 +210,8 @@ export default function AdminReportsPage() {
                           <li key={p.id} className="flex justify-between gap-2">
                             <span>{p.name}</span>
                             <span className="shrink-0 text-brand-cream/40">
-                              {calculateAge(p.birthDate)} · {p.shirtSize}
+                              {calculateAge(p.birthDate)}
+                              {p.shirtSize ? ` · ${p.shirtSize}` : ""}
                             </span>
                           </li>
                         ))}

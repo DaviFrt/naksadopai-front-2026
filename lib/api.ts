@@ -43,7 +43,14 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
 export type Gender = "MALE" | "FEMALE";
 export type ShirtSize = "PP" | "P" | "M" | "G" | "GG" | "XG" | "XGG";
 export type UserRole = "ADMIN" | "STAFF" | "USER";
-export type OrderStatus = "PENDING" | "PAID" | "EXEMPT" | "CANCELLED" | "EXPIRED" | "REFUNDED";
+export type OrderStatus =
+  | "PENDING"
+  | "PAID"
+  | "EXEMPT"
+  | "SHIRT_CONFIRMED"
+  | "CANCELLED"
+  | "EXPIRED"
+  | "REFUNDED";
 export type PaymentMethod = "INFINITE_PAY" | "PIX_MANUAL" | "CASH" | "CARD_MANUAL";
 export type OrderSource = "SITE" | "ADMIN";
 
@@ -60,6 +67,7 @@ export interface Batch {
   price: string;
   end_date: string;
   min_participant_age: number | null;
+  includes_shirt: boolean;
 }
 
 export type PublicBatchStatus = "em-breve" | "ativo" | "esgotado";
@@ -71,6 +79,7 @@ export interface PublicBatch {
   start_date: string;
   end_date: string;
   status: PublicBatchStatus;
+  includes_shirt: boolean;
 }
 
 export interface Church {
@@ -83,7 +92,7 @@ export interface Participant {
   name: string;
   birthDate: string;
   gender: Gender;
-  shirtSize: ShirtSize;
+  shirtSize: ShirtSize | null;
   churchId: string;
 }
 
@@ -115,6 +124,7 @@ export interface AdminBatch {
   startDate: string;
   endDate: string;
   price: string;
+  includesShirt: boolean;
 }
 
 export type ShirtReport = Record<Gender, Partial<Record<ShirtSize, number>>>;
@@ -123,7 +133,7 @@ export interface ChurchReportParticipant {
   id: string;
   name: string;
   birthDate: string;
-  shirtSize: ShirtSize;
+  shirtSize: ShirtSize | null;
   gender: Gender;
 }
 
@@ -137,6 +147,23 @@ export interface ChurchReport {
 export interface FinancialReport {
   total_paid: number;
   total_pending: number;
+  total_pending_guest_church: number;
   total_exempt: number;
   by_payment_method: Record<string, number>;
+}
+
+export interface ShirtOrderItem {
+  id: string;
+  name: string;
+  gender: Gender;
+  shirtSize: ShirtSize;
+}
+
+export interface ShirtOrder {
+  id: string;
+  status: OrderStatus;
+  paymentMethod: PaymentMethod | null;
+  totalAmount: string;
+  createdAt: string;
+  items: ShirtOrderItem[];
 }
