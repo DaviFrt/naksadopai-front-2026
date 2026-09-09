@@ -29,7 +29,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { Plus, X, Loader2 } from "lucide-react";
+import { Plus, X, Loader2, Trash2 } from "lucide-react";
 
 const SHIRT_SIZES: ShirtSize[] = ["PP", "P", "M", "G", "GG", "XG", "XGG"];
 const GENDER_LABEL: Record<Gender, string> = { MALE: "Masculino", FEMALE: "Feminino" };
@@ -151,6 +151,20 @@ function ShirtOrderCard({
     }
   }
 
+  async function handleDelete() {
+    const names = shirtOrder.items.map((item) => item.name).join(", ");
+    if (!window.confirm(`Apagar este pedido (${names})? Essa ação não pode ser desfeita.`)) {
+      return;
+    }
+    setError(null);
+    try {
+      await apiFetch(`/api/admin/shirt-orders/${shirtOrder.id}`, { method: "DELETE" });
+      onChanged();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Não foi possível apagar.");
+    }
+  }
+
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -160,7 +174,13 @@ function ShirtOrderCard({
             onValueChange={(v) => {
               const value = v as OrderStatus;
               setStatus(value);
-              save({ status: value });
+              // Se for PAID e ainda não houver forma de pagamento escolhida,
+              // espera o próximo select em vez de salvar incompleto.
+              if (value === "PAID" && !paymentMethod) return;
+              save({
+                status: value,
+                payment_method: value === "PAID" ? paymentMethod || undefined : undefined,
+              });
             }}
           >
             <SelectTrigger size="sm" className={`h-8 w-40 ${STATUS_COLOR[status]}`}>
@@ -181,7 +201,7 @@ function ShirtOrderCard({
               onValueChange={(v) => {
                 const value = v as PaymentMethod;
                 setPaymentMethod(value);
-                save({ payment_method: value });
+                save({ status: "PAID", payment_method: value });
               }}
             >
               <SelectTrigger size="sm" className="h-8 w-36">
@@ -199,23 +219,111 @@ function ShirtOrderCard({
             </Select>
           )}
         </div>
-        <span className="font-semibold text-primary">
-          R$ {Number(shirtOrder.totalAmount).toFixed(2)}
-        </span>
+        <div className="flex items-center gap-3">
+          <span className="font-semibold text-primary">
+            R$ {Number(shirtOrder.totalAmount).toFixed(2)}
+          </span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            className="text-muted-foreground hover:text-destructive"
+            onClick={handleDelete}
+          >
+            <Trash2 className="size-4" />
+          </Button>
+        </div>
       </div>
 
-      <ul className="flex flex-col gap-1 text-sm text-muted-foreground">
+      <div className="flex flex-col gap-2">
         {shirtOrder.items.map((item) => (
-          <li key={item.id} className="flex justify-between gap-2">
-            <span>{item.name}</span>
-            <span className="shrink-0 text-muted-foreground/70">
-              {GENDER_LABEL[item.gender]} · {item.shirtSize}
-            </span>
-          </li>
+          <ShirtOrderItemRow
+            key={item.id}
+            shirtOrderId={shirtOrder.id}
+            item={item}
+            onChanged={onChanged}
+          />
         ))}
-      </ul>
+      </div>
 
       {error && <p className="text-sm text-destructive">{error}</p>}
+    </div>
+  );
+}
+
+function ShirtOrderItemRow({
+  shirtOrderId,
+  item,
+  onChanged,
+}: {
+  shirtOrderId: string;
+  item: ShirtOrder["items"][number];
+  onChanged: () => void;
+}) {
+  const [name, setName] = useState(item.name);
+  const [gender, setGender] = useState<Gender>(item.gender);
+  const [shirtSize, setShirtSize] = useState<ShirtSize>(item.shirtSize);
+  const [error, setError] = useState<string | null>(null);
+
+  async function save(patch: { name?: string; gender?: Gender; shirt_size?: ShirtSize }) {
+    setError(null);
+    try {
+      await apiFetch(`/api/admin/shirt-orders/${shirtOrderId}/items/${item.id}`, {
+        method: "PATCH",
+        body: JSON.stringify(patch),
+      });
+      onChanged();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Não foi possível salvar.");
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center gap-2">
+        <Input
+          className="h-8 flex-1 text-sm"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          onBlur={() => name !== item.name && name.trim() && save({ name })}
+        />
+        <Select
+          value={gender}
+          onValueChange={(v) => {
+            const value = v as Gender;
+            setGender(value);
+            save({ gender: value });
+          }}
+        >
+          <SelectTrigger size="sm" className="h-8 w-28">
+            <SelectValue>{(v: string) => GENDER_LABEL[v as Gender]}</SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="MALE">Masculino</SelectItem>
+            <SelectItem value="FEMALE">Feminino</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select
+          value={shirtSize}
+          onValueChange={(v) => {
+            const value = v as ShirtSize;
+            setShirtSize(value);
+            save({ shirt_size: value });
+          }}
+        >
+          <SelectTrigger size="sm" className="h-8 w-16">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {SHIRT_SIZES.map((size) => (
+              <SelectItem key={size} value={size}>
+                {size}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
   );
 }

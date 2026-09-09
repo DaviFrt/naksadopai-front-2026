@@ -129,6 +129,11 @@ export interface AdminBatch {
 
 export type ShirtReport = Record<Gender, Partial<Record<ShirtSize, number>>>;
 
+export interface ShirtsReportResponse {
+  total: ShirtReport;
+  avulsas: ShirtReport;
+}
+
 export interface ChurchReportParticipant {
   id: string;
   name: string;
@@ -150,6 +155,11 @@ export interface FinancialReport {
   total_pending_guest_church: number;
   total_exempt: number;
   by_payment_method: Record<string, number>;
+  shirt_orders: {
+    total_paid: number;
+    total_pending: number;
+    total_exempt: number;
+  };
 }
 
 export interface ShirtOrderItem {

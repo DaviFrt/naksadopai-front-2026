@@ -519,7 +519,13 @@ function ParticipantRow({
             onValueChange={(v) => {
               const value = v as OrderStatus;
               setStatus(value);
-              saveOrder({ status: value });
+              // Se for PAID e ainda não houver forma de pagamento escolhida,
+              // espera o select de pagamento em vez de salvar incompleto.
+              if (value === "PAID" && !paymentMethod) return;
+              saveOrder({
+                status: value,
+                payment_method: value === "PAID" ? paymentMethod || undefined : undefined,
+              });
             }}
           >
             <SelectTrigger size="sm" className={cn("h-8 w-32", STATUS_COLOR[status])}>
@@ -543,7 +549,10 @@ function ParticipantRow({
               onValueChange={(v) => {
                 const value = v as PaymentMethod;
                 setPaymentMethod(value);
-                saveOrder({ payment_method: value });
+                saveOrder({
+                  payment_method: value,
+                  status: status === "PAID" ? "PAID" : undefined,
+                });
               }}
             >
               <SelectTrigger size="sm" className="h-8 w-36">
