@@ -331,7 +331,7 @@ function ShirtOrderItemRow({
 
 function NewShirtOrderForm({ onCreated }: { onCreated: () => void }) {
   const [items, setItems] = useState<NewItem[]>([emptyItem()]);
-  const [status, setStatus] = useState<"PENDING" | "PAID" | "EXEMPT">("PAID");
+  const [status, setStatus] = useState<"PENDING" | "PAID" | "EXEMPT" | "SHIRT_CONFIRMED">("PAID");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("PIX_MANUAL");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -378,13 +378,21 @@ function NewShirtOrderForm({ onCreated }: { onCreated: () => void }) {
           <Select value={status} onValueChange={(v) => setStatus(v as typeof status)}>
             <SelectTrigger className="w-full">
               <SelectValue>
-                {(v: string) => ({ PAID: "Pago", PENDING: "Pendente", EXEMPT: "Isento" })[v] ?? v}
+                {(v: string) =>
+                  ({
+                    PAID: "Pago",
+                    PENDING: "Pendente",
+                    EXEMPT: "Isento",
+                    SHIRT_CONFIRMED: "Camisa confirmada",
+                  })[v] ?? v
+                }
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="PAID">Pago</SelectItem>
               <SelectItem value="PENDING">Pendente</SelectItem>
               <SelectItem value="EXEMPT">Isento</SelectItem>
+              <SelectItem value="SHIRT_CONFIRMED">Camisa confirmada</SelectItem>
             </SelectContent>
           </Select>
         </div>

@@ -1,7 +1,6 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import {
-  AVULSA_SHIRT_SIZES,
   SHIRT_SIZE_LABEL,
   type AvulsaShirtSize,
   type ChurchReport,
@@ -13,6 +12,25 @@ import {
 const GENDER_LABEL: Record<Gender, string> = { MALE: "Masculino", FEMALE: "Feminino" };
 
 const CONFIRMED_ORDER_STATUSES = new Set(["PENDING", "PAID", "EXEMPT", "SHIRT_CONFIRMED"]);
+
+// Só a ordem de exibição no PDF — infantil primeiro, depois os tamanhos
+// adultos. O select de criação de pedido continua usando AVULSA_SHIRT_SIZES.
+const PDF_SIZE_ORDER: AvulsaShirtSize[] = [
+  "INF2",
+  "INF4",
+  "INF6",
+  "INF8",
+  "INF10",
+  "INF12",
+  "INF14",
+  "PP",
+  "P",
+  "M",
+  "G",
+  "GG",
+  "XG",
+  "XGG",
+];
 
 // public/logo.png é 245x44px — mantém a proporção ao desenhar no PDF.
 const LOGO_URL = "/logo.png";
@@ -41,8 +59,8 @@ function loadLogoDataUrl(): Promise<string | null> {
 }
 
 function sizeIndex(size: AvulsaShirtSize): number {
-  const i = AVULSA_SHIRT_SIZES.indexOf(size);
-  return i === -1 ? AVULSA_SHIRT_SIZES.length : i;
+  const i = PDF_SIZE_ORDER.indexOf(size);
+  return i === -1 ? PDF_SIZE_ORDER.length : i;
 }
 
 function sizeIndexOrNull(size: AvulsaShirtSize | null): number {
@@ -165,7 +183,9 @@ export async function downloadGeneralShirtsPdf(churches: ChurchReport[], shirtOr
   }
 
   for (const order of shirtOrders) {
-    if (order.status !== "PAID" && order.status !== "EXEMPT") continue;
+    if (order.status !== "PAID" && order.status !== "EXEMPT" && order.status !== "SHIRT_CONFIRMED") {
+      continue;
+    }
     for (const item of order.items) {
       byGender[item.gender].push({ name: item.name, shirtSize: item.shirtSize });
     }
@@ -182,7 +202,7 @@ export async function downloadGeneralShirtsPdf(churches: ChurchReport[], shirtOr
     doc.setFontSize(13);
     doc.text(`${GENDER_LABEL[gender]} — ${entries.length}`, 14, CONTENT_START_Y);
 
-    const counts = AVULSA_SHIRT_SIZES.filter((size) => entries.some((e) => e.shirtSize === size))
+    const counts = PDF_SIZE_ORDER.filter((size) => entries.some((e) => e.shirtSize === size))
       .map(
         (size) =>
           `${SHIRT_SIZE_LABEL[size]}: ${entries.filter((e) => e.shirtSize === size).length}`,
