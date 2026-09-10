@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import {
   apiFetch,
   ApiError,
+  AVULSA_SHIRT_SIZES,
+  SHIRT_SIZE_LABEL,
+  type AvulsaShirtSize,
   type Gender,
   type OrderStatus,
   type PaymentMethod,
   type ShirtOrder,
-  type ShirtSize,
 } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,7 +33,6 @@ import {
 } from "@/components/ui/dialog";
 import { Plus, X, Loader2, Trash2 } from "lucide-react";
 
-const SHIRT_SIZES: ShirtSize[] = ["PP", "P", "M", "G", "GG", "XG", "XGG"];
 const GENDER_LABEL: Record<Gender, string> = { MALE: "Masculino", FEMALE: "Feminino" };
 const MANUAL_PAYMENT_METHODS: PaymentMethod[] = ["PIX_MANUAL", "CASH", "CARD_MANUAL"];
 
@@ -65,7 +66,7 @@ const STATUS_COLOR: Record<OrderStatus, string> = {
 interface NewItem {
   name: string;
   gender: Gender;
-  shirt_size: ShirtSize;
+  shirt_size: AvulsaShirtSize;
 }
 
 function emptyItem(): NewItem {
@@ -262,10 +263,10 @@ function ShirtOrderItemRow({
 }) {
   const [name, setName] = useState(item.name);
   const [gender, setGender] = useState<Gender>(item.gender);
-  const [shirtSize, setShirtSize] = useState<ShirtSize>(item.shirtSize);
+  const [shirtSize, setShirtSize] = useState<AvulsaShirtSize>(item.shirtSize);
   const [error, setError] = useState<string | null>(null);
 
-  async function save(patch: { name?: string; gender?: Gender; shirt_size?: ShirtSize }) {
+  async function save(patch: { name?: string; gender?: Gender; shirt_size?: AvulsaShirtSize }) {
     setError(null);
     try {
       await apiFetch(`/api/admin/shirt-orders/${shirtOrderId}/items/${item.id}`, {
@@ -306,18 +307,18 @@ function ShirtOrderItemRow({
         <Select
           value={shirtSize}
           onValueChange={(v) => {
-            const value = v as ShirtSize;
+            const value = v as AvulsaShirtSize;
             setShirtSize(value);
             save({ shirt_size: value });
           }}
         >
-          <SelectTrigger size="sm" className="h-8 w-16">
-            <SelectValue />
+          <SelectTrigger size="sm" className="h-8 w-24">
+            <SelectValue>{(v: string) => SHIRT_SIZE_LABEL[v as AvulsaShirtSize]}</SelectValue>
           </SelectTrigger>
           <SelectContent>
-            {SHIRT_SIZES.map((size) => (
+            {AVULSA_SHIRT_SIZES.map((size) => (
               <SelectItem key={size} value={size}>
-                {size}
+                {SHIRT_SIZE_LABEL[size]}
               </SelectItem>
             ))}
           </SelectContent>
@@ -447,15 +448,15 @@ function NewShirtOrderForm({ onCreated }: { onCreated: () => void }) {
               </Select>
               <Select
                 value={item.shirt_size}
-                onValueChange={(v) => v && update(index, { shirt_size: v as ShirtSize })}
+                onValueChange={(v) => v && update(index, { shirt_size: v as AvulsaShirtSize })}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue />
+                  <SelectValue>{(v: string) => SHIRT_SIZE_LABEL[v as AvulsaShirtSize]}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {SHIRT_SIZES.map((size) => (
+                  {AVULSA_SHIRT_SIZES.map((size) => (
                     <SelectItem key={size} value={size}>
-                      {size}
+                      {SHIRT_SIZE_LABEL[size]}
                     </SelectItem>
                   ))}
                 </SelectContent>

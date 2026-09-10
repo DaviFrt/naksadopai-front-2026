@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import {
   apiFetch,
+  SHIRT_SIZE_LABEL,
+  type AvulsaShirtSize,
   type ChurchReport,
   type ChurchReportParticipant,
   type FinancialReport,
@@ -22,6 +24,15 @@ const PAYMENT_METHOD_LABEL: Record<string, string> = {
 };
 
 const SHIRT_SIZES: ShirtSize[] = ["PP", "P", "M", "G", "GG", "XG", "XGG"];
+const INFANT_SHIRT_SIZES: AvulsaShirtSize[] = [
+  "INF2",
+  "INF4",
+  "INF6",
+  "INF8",
+  "INF10",
+  "INF12",
+  "INF14",
+];
 
 function calculateAge(birthDate: string): number {
   const birth = new Date(birthDate);
@@ -36,7 +47,7 @@ function sortByAge(participants: ChurchReportParticipant[]) {
   return [...participants].sort((a, b) => calculateAge(b.birthDate) - calculateAge(a.birthDate));
 }
 
-function sumSizes(sizes: Partial<Record<ShirtSize, number>>): number {
+function sumSizes(sizes: Partial<Record<AvulsaShirtSize, number>>): number {
   return Object.values(sizes).reduce<number>((sum, n) => sum + (n ?? 0), 0);
 }
 
@@ -120,6 +131,22 @@ export default function AdminReportsPage() {
                       </div>
                     );
                   })}
+                  {INFANT_SHIRT_SIZES.filter((size) => (shirts.total.MALE[size] ?? 0) > 0).map(
+                    (size) => (
+                      <div key={size} className="flex items-center justify-between text-sm">
+                        <span className="text-brand-cream/70">{SHIRT_SIZE_LABEL[size]}</span>
+                        <span className="font-semibold text-brand-gold">
+                          {shirts.total.MALE[size]}
+                          {(shirts.avulsas.MALE[size] ?? 0) > 0 && (
+                            <span className="ml-1.5 text-xs font-normal text-brand-cream/50">
+                              ({shirts.avulsas.MALE[size]} avulsa
+                              {shirts.avulsas.MALE[size] === 1 ? "" : "s"})
+                            </span>
+                          )}
+                        </span>
+                      </div>
+                    ),
+                  )}
                 </div>
               </div>
               <div>
@@ -143,6 +170,22 @@ export default function AdminReportsPage() {
                       </div>
                     );
                   })}
+                  {INFANT_SHIRT_SIZES.filter((size) => (shirts.total.FEMALE[size] ?? 0) > 0).map(
+                    (size) => (
+                      <div key={size} className="flex items-center justify-between text-sm">
+                        <span className="text-brand-cream/70">{SHIRT_SIZE_LABEL[size]}</span>
+                        <span className="font-semibold text-brand-tan">
+                          {shirts.total.FEMALE[size]}
+                          {(shirts.avulsas.FEMALE[size] ?? 0) > 0 && (
+                            <span className="ml-1.5 text-xs font-normal text-brand-cream/50">
+                              ({shirts.avulsas.FEMALE[size]} avulsa
+                              {shirts.avulsas.FEMALE[size] === 1 ? "" : "s"})
+                            </span>
+                          )}
+                        </span>
+                      </div>
+                    ),
+                  )}
                 </div>
               </div>
             </div>

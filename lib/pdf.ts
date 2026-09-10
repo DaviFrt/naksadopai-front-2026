@@ -1,8 +1,15 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import type { ChurchReport, ChurchReportParticipant, Gender, ShirtOrder, ShirtSize } from "@/lib/api";
+import {
+  AVULSA_SHIRT_SIZES,
+  SHIRT_SIZE_LABEL,
+  type AvulsaShirtSize,
+  type ChurchReport,
+  type ChurchReportParticipant,
+  type Gender,
+  type ShirtOrder,
+} from "@/lib/api";
 
-const SHIRT_SIZE_ORDER: ShirtSize[] = ["PP", "P", "M", "G", "GG", "XG", "XGG"];
 const GENDER_LABEL: Record<Gender, string> = { MALE: "Masculino", FEMALE: "Feminino" };
 
 const CONFIRMED_ORDER_STATUSES = new Set(["PENDING", "PAID", "EXEMPT", "SHIRT_CONFIRMED"]);
@@ -33,9 +40,21 @@ function loadLogoDataUrl(): Promise<string | null> {
   return logoDataUrlPromise;
 }
 
-function sizeIndex(size: ShirtSize): number {
-  const i = SHIRT_SIZE_ORDER.indexOf(size);
-  return i === -1 ? SHIRT_SIZE_ORDER.length : i;
+function sizeIndex(size: AvulsaShirtSize): number {
+  const i = AVULSA_SHIRT_SIZES.indexOf(size);
+  return i === -1 ? AVULSA_SHIRT_SIZES.length : i;
+}
+
+function sizeIndexOrNull(size: AvulsaShirtSize | null): number {
+  return size ? sizeIndex(size) : Number.MAX_SAFE_INTEGER;
+}
+
+function bySizeThenName<T extends { shirtSize: AvulsaShirtSize | null; name: string }>(
+  a: T,
+  b: T,
+): number {
+  const bySize = sizeIndexOrNull(a.shirtSize) - sizeIndexOrNull(b.shirtSize);
+  return bySize !== 0 ? bySize : a.name.localeCompare(b.name, "pt-BR");
 }
 
 function today(): string {
@@ -82,8 +101,8 @@ export async function downloadChurchPdf(church: ChurchReport) {
   const doc = await newDoc(`Igreja ${church.name} — Lista de participantes`);
 
   const rows = [...church.participants]
-    .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"))
-    .map((p) => [p.name, GENDER_LABEL[p.gender], p.shirtSize ?? "—"]);
+    .sort(bySizeThenName)
+    .map((p) => [p.name, GENDER_LABEL[p.gender], p.shirtSize ? SHIRT_SIZE_LABEL[p.shirtSize] : "—"]);
 
   autoTable(doc, {
     startY: CONTENT_START_Y,
@@ -106,9 +125,9 @@ export async function downloadShirtOrdersPdf(shirtOrders: ShirtOrder[]) {
   const items = shirtOrders
     .filter((order) => CONFIRMED_ORDER_STATUSES.has(order.status))
     .flatMap((order) => order.items)
-    .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+    .sort(bySizeThenName);
 
-  const rows = items.map((item) => [item.name, GENDER_LABEL[item.gender], item.shirtSize]);
+  const rows = items.map((item) => [item.name, GENDER_LABEL[item.gender], SHIRT_SIZE_LABEL[item.shirtSize]]);
 
   autoTable(doc, {
     startY: CONTENT_START_Y,
@@ -127,7 +146,7 @@ export async function downloadShirtOrdersPdf(shirtOrders: ShirtOrder[]) {
 
 interface NamedShirtEntry {
   name: string;
-  shirtSize: ShirtSize;
+  shirtSize: AvulsaShirtSize;
 }
 
 export async function downloadGeneralShirtsPdf(churches: ChurchReport[], shirtOrders: ShirtOrder[]) {
@@ -153,10 +172,7 @@ export async function downloadGeneralShirtsPdf(churches: ChurchReport[], shirtOr
   }
 
   (["MALE", "FEMALE"] as Gender[]).forEach((gender, index) => {
-    const entries = [...byGender[gender]].sort((a, b) => {
-      const bySize = sizeIndex(a.shirtSize) - sizeIndex(b.shirtSize);
-      return bySize !== 0 ? bySize : a.name.localeCompare(b.name, "pt-BR");
-    });
+    const entries = [...byGender[gender]].sort(bySizeThenName);
 
     if (index > 0) {
       doc.addPage();
@@ -166,9 +182,12 @@ export async function downloadGeneralShirtsPdf(churches: ChurchReport[], shirtOr
     doc.setFontSize(13);
     doc.text(`${GENDER_LABEL[gender]} — ${entries.length}`, 14, CONTENT_START_Y);
 
-    const counts = SHIRT_SIZE_ORDER.map(
-      (size) => `${size}: ${entries.filter((e) => e.shirtSize === size).length}`,
-    ).join("   ");
+    const counts = AVULSA_SHIRT_SIZES.filter((size) => entries.some((e) => e.shirtSize === size))
+      .map(
+        (size) =>
+          `${SHIRT_SIZE_LABEL[size]}: ${entries.filter((e) => e.shirtSize === size).length}`,
+      )
+      .join("   ");
     doc.setFontSize(9);
     doc.setTextColor(120);
     doc.text(counts, 14, CONTENT_START_Y + 6);
@@ -177,7 +196,7 @@ export async function downloadGeneralShirtsPdf(churches: ChurchReport[], shirtOr
     autoTable(doc, {
       startY: CONTENT_START_Y + 11,
       head: [["Nome", "Camisa"]],
-      body: entries.map((e) => [e.name, e.shirtSize]),
+      body: entries.map((e) => [e.name, SHIRT_SIZE_LABEL[e.shirtSize]]),
       styles: { fontSize: 10 },
       headStyles: { fillColor: [180, 120, 70] },
     });

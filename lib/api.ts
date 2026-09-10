@@ -42,6 +42,44 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
 
 export type Gender = "MALE" | "FEMALE";
 export type ShirtSize = "PP" | "P" | "M" | "G" | "GG" | "XG" | "XGG";
+// Tamanhos extras (infantil, por idade) — só usados em camisetas avulsas,
+// nunca na inscrição de participantes do evento.
+export type InfantShirtSize = "INF2" | "INF4" | "INF6" | "INF8" | "INF10" | "INF12" | "INF14";
+export type AvulsaShirtSize = ShirtSize | InfantShirtSize;
+
+export const AVULSA_SHIRT_SIZES: AvulsaShirtSize[] = [
+  "PP",
+  "P",
+  "M",
+  "G",
+  "GG",
+  "XG",
+  "XGG",
+  "INF2",
+  "INF4",
+  "INF6",
+  "INF8",
+  "INF10",
+  "INF12",
+  "INF14",
+];
+
+export const SHIRT_SIZE_LABEL: Record<AvulsaShirtSize, string> = {
+  PP: "PP",
+  P: "P",
+  M: "M",
+  G: "G",
+  GG: "GG",
+  XG: "XG",
+  XGG: "XGG",
+  INF2: "2 anos",
+  INF4: "4 anos",
+  INF6: "6 anos",
+  INF8: "8 anos",
+  INF10: "10 anos",
+  INF12: "12 anos",
+  INF14: "14 anos",
+};
 export type UserRole = "ADMIN" | "STAFF" | "USER";
 export type OrderStatus =
   | "PENDING"
@@ -127,7 +165,7 @@ export interface AdminBatch {
   includesShirt: boolean;
 }
 
-export type ShirtReport = Record<Gender, Partial<Record<ShirtSize, number>>>;
+export type ShirtReport = Record<Gender, Partial<Record<AvulsaShirtSize, number>>>;
 
 export interface ShirtsReportResponse {
   total: ShirtReport;
@@ -166,7 +204,7 @@ export interface ShirtOrderItem {
   id: string;
   name: string;
   gender: Gender;
-  shirtSize: ShirtSize;
+  shirtSize: AvulsaShirtSize;
 }
 
 export interface ShirtOrder {
