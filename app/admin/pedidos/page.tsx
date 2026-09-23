@@ -400,7 +400,11 @@ function ParticipantRow({
     }
   }
 
-  async function saveOrder(patch: { status?: OrderStatus; payment_method?: PaymentMethod }) {
+  async function saveOrder(patch: {
+    status?: OrderStatus;
+    payment_method?: PaymentMethod;
+    kept_amount?: number;
+  }) {
     setError(null);
     try {
       await apiFetch(`/api/admin/orders/${order.id}`, {
@@ -520,6 +524,22 @@ function ParticipantRow({
             value={status}
             onValueChange={(v) => {
               const value = v as OrderStatus;
+
+              if (value === "PARTIALLY_REFUNDED") {
+                const input = window.prompt(
+                  "Qual valor fica retido (não devolvido) nesse reembolso parcial? Em R$, ex: 55",
+                );
+                if (input === null) return; // cancelou, não muda nada
+                const keptAmount = Number(input.replace(",", "."));
+                if (Number.isNaN(keptAmount) || keptAmount < 0) {
+                  setError("Valor retido inválido.");
+                  return;
+                }
+                setStatus(value);
+                saveOrder({ status: value, kept_amount: keptAmount });
+                return;
+              }
+
               setStatus(value);
               // Se for PAID e ainda não houver forma de pagamento escolhida,
               // espera o select de pagamento em vez de salvar incompleto.
