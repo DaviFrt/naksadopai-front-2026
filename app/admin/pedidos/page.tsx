@@ -33,7 +33,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { Plus, X, Loader2 } from "lucide-react";
+import { Plus, X, Loader2, SplitSquareHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const STATUS_LABEL: Record<OrderStatus, string> = {
@@ -289,6 +289,7 @@ export default function AdminOrdersPage() {
               <th className="px-3 py-3 font-semibold">Valor</th>
               <th className="px-3 py-3 font-semibold">Status</th>
               <th className="px-3 py-3 font-semibold">Pagamento</th>
+              <th className="px-3 py-3 font-semibold" />
             </tr>
           </thead>
           <tbody>
@@ -414,6 +415,25 @@ function ParticipantRow({
       onChanged();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Não foi possível salvar.");
+    }
+  }
+
+  async function splitParticipant() {
+    if (
+      !window.confirm(
+        `Separar ${participant.name} num pedido próprio? O pedido atual (${groupSize} pessoas) fica só com o restante do grupo, e as mudanças de status feitas por aqui deixam de afetar quem for separado.`,
+      )
+    ) {
+      return;
+    }
+    setError(null);
+    try {
+      await apiFetch(`/api/admin/orders/${order.id}/participants/${participant.id}/split`, {
+        method: "POST",
+      });
+      onChanged();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Não foi possível separar.");
     }
   }
 
@@ -622,10 +642,23 @@ function ParticipantRow({
             </Select>
           )}
         </td>
+        <td className="px-3 py-2">
+          {groupSize > 1 && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              title="Separar num pedido próprio"
+              onClick={splitParticipant}
+            >
+              <SplitSquareHorizontal className="size-3.5" />
+            </Button>
+          )}
+        </td>
       </tr>
       {error && (
         <tr>
-          <td colSpan={9} className="px-3 py-1 text-xs text-destructive">
+          <td colSpan={10} className="px-3 py-1 text-xs text-destructive">
             {error}
           </td>
         </tr>
