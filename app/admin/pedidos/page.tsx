@@ -526,6 +526,30 @@ function ParticipantRow({
               const value = v as OrderStatus;
 
               if (value === "PARTIALLY_REFUNDED") {
+                // Reembolso parcial exige um payment_method já registrado no
+                // pedido — se ainda não tem (ex: veio de "camisa confirmada"
+                // sem passar por "Pago" antes), pede aqui mesmo, num fluxo só,
+                // pra não depender de escolher a forma de pagamento numa
+                // coluna separada antes de trocar o status.
+                let resolvedPaymentMethod: PaymentMethod | undefined = paymentMethod || undefined;
+                if (!resolvedPaymentMethod) {
+                  const methodInput = window.prompt(
+                    "Esse pedido ainda não tem forma de pagamento registrada. " +
+                      "Qual foi? Digite 1 (Pix), 2 (Dinheiro) ou 3 (Cartão):",
+                  );
+                  if (methodInput === null) return; // cancelou
+                  const methodMap: Record<string, PaymentMethod> = {
+                    "1": "PIX_MANUAL",
+                    "2": "CASH",
+                    "3": "CARD_MANUAL",
+                  };
+                  resolvedPaymentMethod = methodMap[methodInput.trim()];
+                  if (!resolvedPaymentMethod) {
+                    setError("Forma de pagamento inválida — digite 1, 2 ou 3.");
+                    return;
+                  }
+                }
+
                 const input = window.prompt(
                   "Qual valor fica retido (não devolvido) nesse reembolso parcial? Em R$, ex: 55",
                 );
@@ -535,8 +559,14 @@ function ParticipantRow({
                   setError("Valor retido inválido.");
                   return;
                 }
+
                 setStatus(value);
-                saveOrder({ status: value, kept_amount: keptAmount });
+                setPaymentMethod(resolvedPaymentMethod);
+                saveOrder({
+                  status: value,
+                  kept_amount: keptAmount,
+                  payment_method: resolvedPaymentMethod,
+                });
                 return;
               }
 
