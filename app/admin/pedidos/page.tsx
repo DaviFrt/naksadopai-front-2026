@@ -44,6 +44,7 @@ const STATUS_LABEL: Record<OrderStatus, string> = {
   CANCELLED: "Cancelado",
   EXPIRED: "Expirado",
   REFUNDED: "Reembolsado",
+  PARTIALLY_REFUNDED: "Reembolso parcial",
 };
 
 const STATUS_COLOR: Record<OrderStatus, string> = {
@@ -54,6 +55,7 @@ const STATUS_COLOR: Record<OrderStatus, string> = {
   CANCELLED: "text-red-400",
   EXPIRED: "text-red-400/70",
   REFUNDED: "text-red-400/70",
+  PARTIALLY_REFUNDED: "text-orange-400",
 };
 
 const PAYMENT_METHOD_LABEL: Record<PaymentMethod, string> = {

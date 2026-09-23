@@ -88,7 +88,8 @@ export type OrderStatus =
   | "SHIRT_CONFIRMED"
   | "CANCELLED"
   | "EXPIRED"
-  | "REFUNDED";
+  | "REFUNDED"
+  | "PARTIALLY_REFUNDED";
 export type PaymentMethod = "INFINITE_PAY" | "PIX_MANUAL" | "CASH" | "CARD_MANUAL";
 export type OrderSource = "SITE" | "ADMIN";
 

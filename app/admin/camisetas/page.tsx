@@ -43,7 +43,11 @@ const PAYMENT_METHOD_LABEL: Record<PaymentMethod, string> = {
   CARD_MANUAL: "Cartão (manual)",
 };
 
-const STATUS_LABEL: Record<OrderStatus, string> = {
+// Reembolso parcial é exclusivo de inscrição no evento (kit + camisa do
+// evento), não se aplica a pedido de camiseta avulsa.
+type ShirtOrderStatus = Exclude<OrderStatus, "PARTIALLY_REFUNDED">;
+
+const STATUS_LABEL: Record<ShirtOrderStatus, string> = {
   PENDING: "Pendente",
   PAID: "Pago",
   EXEMPT: "Isento",
@@ -53,7 +57,7 @@ const STATUS_LABEL: Record<OrderStatus, string> = {
   REFUNDED: "Reembolsado",
 };
 
-const STATUS_COLOR: Record<OrderStatus, string> = {
+const STATUS_COLOR: Record<ShirtOrderStatus, string> = {
   PENDING: "text-brand-tan",
   PAID: "text-emerald-400",
   EXEMPT: "text-muted-foreground",
@@ -133,7 +137,7 @@ function ShirtOrderCard({
   shirtOrder: ShirtOrder;
   onChanged: () => void;
 }) {
-  const [status, setStatus] = useState<OrderStatus>(shirtOrder.status);
+  const [status, setStatus] = useState<ShirtOrderStatus>(shirtOrder.status as ShirtOrderStatus);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | "">(
     shirtOrder.paymentMethod ?? "",
   );
@@ -173,7 +177,7 @@ function ShirtOrderCard({
           <Select
             value={status}
             onValueChange={(v) => {
-              const value = v as OrderStatus;
+              const value = v as ShirtOrderStatus;
               setStatus(value);
               // Se for PAID e ainda não houver forma de pagamento escolhida,
               // espera o próximo select em vez de salvar incompleto.
@@ -185,11 +189,11 @@ function ShirtOrderCard({
             }}
           >
             <SelectTrigger size="sm" className={`h-8 w-40 ${STATUS_COLOR[status]}`}>
-              <SelectValue>{(v: string) => STATUS_LABEL[v as OrderStatus]}</SelectValue>
+              <SelectValue>{(v: string) => STATUS_LABEL[v as ShirtOrderStatus]}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               {Object.entries(STATUS_LABEL).map(([value, label]) => (
-                <SelectItem key={value} value={value} className={STATUS_COLOR[value as OrderStatus]}>
+                <SelectItem key={value} value={value} className={STATUS_COLOR[value as ShirtOrderStatus]}>
                   {label}
                 </SelectItem>
               ))}

@@ -15,6 +15,7 @@ const STATUS_LABEL: Record<OrderStatus, string> = {
   CANCELLED: "Cancelado",
   EXPIRED: "Expirado",
   REFUNDED: "Reembolsado",
+  PARTIALLY_REFUNDED: "Reembolso parcial",
 };
 
 const STATUS_COLOR: Record<OrderStatus, string> = {
@@ -25,6 +26,7 @@ const STATUS_COLOR: Record<OrderStatus, string> = {
   CANCELLED: "text-destructive",
   EXPIRED: "text-destructive/70",
   REFUNDED: "text-destructive/70",
+  PARTIALLY_REFUNDED: "text-orange-500",
 };
 
 export default function MinhasInscricoesPage() {
