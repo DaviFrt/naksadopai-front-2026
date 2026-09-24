@@ -69,6 +69,7 @@ const MANUAL_PAYMENT_METHODS: PaymentMethod[] = ["PIX_MANUAL", "CASH", "CARD_MAN
 const SHIRT_SIZES: ShirtSize[] = ["PP", "P", "M", "G", "GG", "XG", "XGG"];
 const GENDER_LABEL: Record<Gender, string> = { MALE: "M", FEMALE: "F" };
 const ALL = "__all__";
+const NO_SHIRT = "__none__";
 
 function calculateAge(birthDate: string): number {
   const birth = new Date(birthDate);
@@ -389,7 +390,7 @@ function ParticipantRow({
     name?: string;
     birth_date?: string;
     gender?: Gender;
-    shirt_size?: ShirtSize;
+    shirt_size?: ShirtSize | null;
     church_id?: string;
   }) {
     setError(null);
@@ -511,6 +512,7 @@ function ParticipantRow({
                 <SelectValue placeholder="—" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value={NO_SHIRT}>Sem camisa</SelectItem>
                 {SHIRT_SIZES.map((size) => (
                   <SelectItem key={size} value={size}>
                     {size}
@@ -678,7 +680,7 @@ interface NewParticipant {
   name: string;
   birth_date: string;
   gender: Gender;
-  shirt_size: ShirtSize;
+  shirt_size: ShirtSize | null;
   church_id: string;
 }
 
@@ -699,6 +701,7 @@ function NewOrderForm({
   const [batchId, setBatchId] = useState("");
   const [status, setStatus] = useState<"PENDING" | "PAID" | "EXEMPT" | "SHIRT_CONFIRMED">("PAID");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("PIX_MANUAL");
+  const [totalAmount, setTotalAmount] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -709,6 +712,7 @@ function NewOrderForm({
         .filter((b) => new Date(b.startDate).getTime() <= now && new Date(b.endDate).getTime() >= now)
         .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0];
   const includesShirt = selectedBatch?.includesShirt ?? true;
+  const defaultTotal = selectedBatch ? Number(selectedBatch.price) * participants.length : null;
 
   function update(index: number, patch: Partial<NewParticipant>) {
     setParticipants((prev) => prev.map((p, i) => (i === index ? { ...p, ...patch } : p)));
@@ -716,6 +720,11 @@ function NewOrderForm({
 
   async function handleSubmit() {
     setError(null);
+    const customTotal = totalAmount.trim() ? Number(totalAmount.replace(",", ".")) : undefined;
+    if (customTotal !== undefined && (Number.isNaN(customTotal) || customTotal < 0)) {
+      setError("Valor total inválido.");
+      return;
+    }
     setPending(true);
     try {
       await apiFetch("/api/admin/orders", {
@@ -727,6 +736,7 @@ function NewOrderForm({
           batch_id: batchId || undefined,
           status,
           payment_method: status === "PAID" ? paymentMethod : undefined,
+          total_amount: customTotal,
         }),
       });
       onCreated();
@@ -811,6 +821,22 @@ function NewOrderForm({
         )}
       </div>
 
+      {status !== "EXEMPT" && (
+        <div className="flex flex-col gap-1.5">
+          <Label>Valor total (opcional)</Label>
+          <Input
+            inputMode="decimal"
+            placeholder={
+              defaultTotal !== null
+                ? `Padrão do lote: R$ ${defaultTotal.toFixed(2)}`
+                : "Padrão do lote"
+            }
+            value={totalAmount}
+            onChange={(e) => setTotalAmount(e.target.value)}
+          />
+        </div>
+      )}
+
       <div className="flex flex-col gap-4">
         {participants.map((participant, index) => (
           <div key={index} className="flex flex-col gap-3 rounded-xl border border-border/60 bg-muted/30 p-4">
@@ -853,13 +879,16 @@ function NewOrderForm({
               </Select>
               {includesShirt && (
                 <Select
-                  value={participant.shirt_size}
-                  onValueChange={(v) => update(index, { shirt_size: v as ShirtSize })}
+                  value={participant.shirt_size ?? NO_SHIRT}
+                  onValueChange={(v) =>
+                    update(index, { shirt_size: v === NO_SHIRT ? null : (v as ShirtSize) })
+                  }
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue />
+                    <SelectValue>{(v: string) => (v === NO_SHIRT ? "Sem camisa" : v)}</SelectValue>
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value={NO_SHIRT}>Sem camisa</SelectItem>
                     {SHIRT_SIZES.map((size) => (
                       <SelectItem key={size} value={size}>
                         {size}
