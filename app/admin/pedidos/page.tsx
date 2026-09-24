@@ -300,6 +300,7 @@ export default function AdminOrdersPage() {
                 participant={participant}
                 churches={churches}
                 groupSize={order.participants.length}
+                includesShirt={batches.find((b) => b.id === order.batchId)?.includesShirt ?? true}
                 onChanged={load}
               />
             ))}
@@ -363,12 +364,14 @@ function ParticipantRow({
   participant,
   churches,
   groupSize,
+  includesShirt,
   onChanged,
 }: {
   order: AdminOrder;
   participant: AdminOrder["participants"][number];
   churches: Church[];
   groupSize: number;
+  includesShirt: boolean;
   onChanged: () => void;
 }) {
   const [name, setName] = useState(participant.name);
@@ -495,25 +498,29 @@ function ParticipantRow({
           </Select>
         </td>
         <td className="px-3 py-2">
-          <Select
-            value={shirtSize || undefined}
-            onValueChange={(v) => {
-              const value = v as ShirtSize;
-              setShirtSize(value);
-              saveParticipant({ shirt_size: value });
-            }}
-          >
-            <SelectTrigger size="sm" className="h-8 w-16">
-              <SelectValue placeholder="—" />
-            </SelectTrigger>
-            <SelectContent>
-              {SHIRT_SIZES.map((size) => (
-                <SelectItem key={size} value={size}>
-                  {size}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {includesShirt ? (
+            <Select
+              value={shirtSize || undefined}
+              onValueChange={(v) => {
+                const value = v as ShirtSize;
+                setShirtSize(value);
+                saveParticipant({ shirt_size: value });
+              }}
+            >
+              <SelectTrigger size="sm" className="h-8 w-16">
+                <SelectValue placeholder="—" />
+              </SelectTrigger>
+              <SelectContent>
+                {SHIRT_SIZES.map((size) => (
+                  <SelectItem key={size} value={size}>
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <span className="text-muted-foreground">—</span>
+          )}
         </td>
         <td className="px-3 py-2">
           <Select
@@ -695,6 +702,14 @@ function NewOrderForm({
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
+  const [now] = useState(() => Date.now());
+  const selectedBatch = batchId
+    ? batches.find((b) => b.id === batchId)
+    : batches
+        .filter((b) => new Date(b.startDate).getTime() <= now && new Date(b.endDate).getTime() >= now)
+        .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0];
+  const includesShirt = selectedBatch?.includesShirt ?? true;
+
   function update(index: number, patch: Partial<NewParticipant>) {
     setParticipants((prev) => prev.map((p, i) => (i === index ? { ...p, ...patch } : p)));
   }
@@ -706,7 +721,9 @@ function NewOrderForm({
       await apiFetch("/api/admin/orders", {
         method: "POST",
         body: JSON.stringify({
-          participants,
+          participants: participants.map(({ shirt_size, ...rest }) =>
+            includesShirt ? { ...rest, shirt_size } : rest,
+          ),
           batch_id: batchId || undefined,
           status,
           payment_method: status === "PAID" ? paymentMethod : undefined,
@@ -819,7 +836,7 @@ function NewOrderForm({
               value={participant.birth_date}
               onChange={(v) => update(index, { birth_date: v })}
             />
-            <div className="grid grid-cols-2 gap-3">
+            <div className={cn("grid gap-3", includesShirt ? "grid-cols-2" : "grid-cols-1")}>
               <Select
                 value={participant.gender}
                 onValueChange={(v) => update(index, { gender: v as Gender })}
@@ -834,21 +851,23 @@ function NewOrderForm({
                   <SelectItem value="FEMALE">Feminino</SelectItem>
                 </SelectContent>
               </Select>
-              <Select
-                value={participant.shirt_size}
-                onValueChange={(v) => update(index, { shirt_size: v as ShirtSize })}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {SHIRT_SIZES.map((size) => (
-                    <SelectItem key={size} value={size}>
-                      {size}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {includesShirt && (
+                <Select
+                  value={participant.shirt_size}
+                  onValueChange={(v) => update(index, { shirt_size: v as ShirtSize })}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SHIRT_SIZES.map((size) => (
+                      <SelectItem key={size} value={size}>
+                        {size}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
             <div className="grid grid-cols-1 gap-3">
               <Select
